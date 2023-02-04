@@ -30,7 +30,7 @@ resource "aws_internet_gateway" "my_Igw" {
 }
 
 resource "aws_route_table" "my_Route" {
-  vpc_id = aws_vpc.my_Route.id
+  vpc_id = aws_vpc.custom_vpc.id
 
   route {
     cidr_block = "0.0.0.0/0"
@@ -46,5 +46,5 @@ resource "aws_route_table_association" "route_association" {
   count = 2
 
   subnet_id      = aws_subnet.subnet1[count.index].id
-  route_table_id = aws_route_table.custom_vpc.id
+  route_table_id = aws_route_table.my_Route.id
 }
