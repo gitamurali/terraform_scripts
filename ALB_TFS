@@ -1,0 +1,60 @@
+# This script creates an ALB in the us-east-1 region, with a public-facing IP address and an HTTP listener on port 80. 
+# It also creates a security group for the ALB, two public subnets, a target group, and a VPC.
+
+# You can modify the script to fit your specific requirements, such as using HTTPS instead of HTTP, configuring health checks for the target group, or adding more listeners.
+
+provider "aws" {
+  region = "us-east-1"
+}
+
+resource "aws_lb" "loadbalancer" {
+  name               = "My-lb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.lb_sg.id]
+  subnets            = [aws_subnet.public_subnet_1.id, aws_subnet.public_subnet_2.id]
+
+  access_logs {
+    bucket = "example-bucket"
+  }
+}
+
+resource "aws_security_group" "lb_sg" {
+  name_prefix = "example-lb-sg"
+}
+
+resource "aws_subnet" "public_subnet_1" {
+  cidr_block = "10.0.1.0/24"
+  availability_zone = "us-east-1a"
+}
+
+resource "aws_subnet" "public_subnet_2" {
+  cidr_block = "10.0.2.0/24"
+  availability_zone = "us-east-1b"
+}
+
+resource "aws_lb_listener" "http" {
+  load_balancer_arn = aws_lb.loadbalancer.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.http.arn
+  }
+}
+
+resource "aws_lb_target_group" "http" {
+  name_prefix      = "example-tg"
+  port             = 80
+  protocol         = "HTTP"
+  target_type      = "ip"
+  vpc_id           = aws_vpc.example.id
+}
+
+resource "aws_vpc" "example" {
+  cidr_block = "10.0.0.0/16"
+  tags = {
+    Name = "example-vpc"
+  }
+}
