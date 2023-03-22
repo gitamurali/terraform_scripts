@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "us-east-1"
+  region = var.location
 }
 
 resource "aws_vpc" "custom_vpc" {
@@ -11,13 +11,13 @@ resource "aws_vpc" "custom_vpc" {
 }
 
 resource "aws_subnet" "subnet1" {
-  count = 2
+  count = 3
 
   cidr_block = "10.0.${count.index + 1}.0/24"
   vpc_id     = aws_vpc.custom_vpc.id
 
   tags = {
-    Name = "sub1"
+    Name = "instance$(count.index)"
   }
 }
 
